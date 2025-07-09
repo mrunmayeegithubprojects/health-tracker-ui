@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 export default function Rewards() {
   const [users, setUsers] = useState([]);
@@ -31,7 +32,7 @@ export default function Rewards() {
 
   // 👥 Fetch active users
   useEffect(() => {
-    axios.get("http://localhost:8080/api/users")
+    axios.get(`${API_BASE_URL}/api/users`)
       .then(res => {
         const activeUsers = res.data.filter(user => user.status?.toLowerCase() === "active");
         setUsers(activeUsers);
@@ -45,7 +46,7 @@ export default function Rewards() {
 
     setRewardMessage("Fetching reward...");
 
-    axios.get("http://localhost:8080/api/rewards", {
+    axios.get(`${API_BASE_URL}/api/rewards`, {
       params: {
         userId: selectedUser,
         monYear: selectedMonth // 👈 changed from 'key' to 'monYear'
@@ -55,13 +56,13 @@ export default function Rewards() {
         const val = res.data;
         if (val === null || val === "" || typeof val === "undefined") {
           // Not found → create reward entry
-          axios.post("http://localhost:8080/api/rewards", {
+          axios.post(`${API_BASE_URL}/api/rewards`, {
             userId: selectedUser,
             key: selectedMonth // 👈 backend expects 'key' in request body
           })
             .then(() => {
               // Re-fetch after creating
-              return axios.get("http://localhost:8080/api/rewards", {
+              return axios.get(`${API_BASE_URL}/api/rewards`, {
                 params: {
                   userId: selectedUser,
                   monYear: selectedMonth
@@ -101,7 +102,7 @@ export default function Rewards() {
       return;
     }
 
-    axios.post("http://localhost:8080/api/rewards", {
+    axios.post(`${API_BASE_URL}/api/rewards`, {
       userId: selectedUser,
       key,
       rewardAdjustment: parseFloat(rewardConsumed)
@@ -122,7 +123,7 @@ export default function Rewards() {
       return;
     }
 
-    axios.get("http://localhost:8080/api/rewards", {
+    axios.get(`${API_BASE_URL}/api/rewards`, {
       params: { userId: selectedUser }
     })
       .then(res => {

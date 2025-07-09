@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -10,20 +11,20 @@ export default function Users() {
   }, []);
 
   const fetchUsers = () => {
-    axios.get("http://localhost:8080/api/users").then((res) => setUsers(res.data));
+    axios.get(`${API_BASE_URL}/api/users`).then((res) => setUsers(res.data));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const dto = { ...form, status: "ACTIVE" };
-    const res = await axios.post("http://localhost:8080/api/users", dto);
+    const res = await axios.post(`${API_BASE_URL}/api/users`, dto);
     setUsers([...users, res.data]);
     setForm({ name: "", emailId: "", phoneNo: "" });
   };
 
   const deleteUser = async (userId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/users/${userId}`);
+      await axios.delete(`${API_BASE_URL}/api/users/${userId}`);
       setUsers(users.filter((user) => user.userId !== userId));
     } catch (error) {
       console.error("Failed to delete user:", error);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 export default function UserParameters() {
   const [users, setUsers] = useState([]);
@@ -9,18 +10,18 @@ export default function UserParameters() {
   const [userParams, setUserParams] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/users")
+    axios.get(`${API_BASE_URL}/api/users`)
       .then((res) => setUsers(res.data))
       .catch((err) => console.error("Failed to fetch users", err));
 
-    axios.get("http://localhost:8080/api/parameters")
+    axios.get(`${API_BASE_URL}/api/parameters`)
       .then((res) => setParameters(res.data))
       .catch((err) => console.error("Failed to fetch parameters", err));
   }, []);
 
   useEffect(() => {
     if (selectedUser) {
-      axios.get(`http://localhost:8080/api/userParameter/${selectedUser}`)
+      axios.get(`${API_BASE_URL}/api/userParameter/${selectedUser}`)
         .then((res) => {
           const paramList = res.data.parameterDTOList || [];
           setUserParams(paramList);
@@ -36,11 +37,11 @@ export default function UserParameters() {
 
   const handleAssign = async () => {
     try {
-      await axios.post("http://localhost:8080/api/userParameter", {
+      await axios.post(`${API_BASE_URL}/api/userParameter`, {
         userId: selectedUser,
         parameterIds: selectedParams
       });
-      const res = await axios.get(`http://localhost:8080/api/userParameter/${selectedUser}`);
+      const res = await axios.get(`${API_BASE_URL}/api/userParameter/${selectedUser}`);
       setUserParams(res.data.parameterDTOList || []);
       alert("Parameters assigned successfully!");
     } catch (err) {

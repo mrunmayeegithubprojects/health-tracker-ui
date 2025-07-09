@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 export default function Update() {
   const [users, setUsers] = useState([]);
@@ -24,7 +25,7 @@ export default function Update() {
   });
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/users")
+    axios.get(`${API_BASE_URL}/api/users`)
       .then(res => {
         const activeUsers = res.data.filter(user => user.status?.toLowerCase() === "active");
         setUsers(activeUsers);
@@ -37,7 +38,7 @@ export default function Update() {
 
     // === DAILY LOGIC ===
     setDailyLoading(true);
-    axios.get(`http://localhost:8080/api/daily?userId=${selectedUser}&date=${selectedDate}`)
+    axios.get(`${API_BASE_URL}/api/daily?userId=${selectedUser}&date=${selectedDate}`)
       .then(res => {
         const data = res.data || [];
         if (data.length > 0) {
@@ -49,7 +50,7 @@ export default function Update() {
             paramName: `Param ${dto.paramId}`
           })));
         } else {
-          axios.get(`http://localhost:8080/api/userParameter?userId=${selectedUser}&trackingFrequency=DAILY`)
+          axios.get(`${API_BASE_URL}/api/userParameter?userId=${selectedUser}&trackingFrequency=DAILY`)
             .then(res => {
               const defaults = {};
               (res.data || []).forEach(p => { defaults[p.paramId] = false });
@@ -62,7 +63,7 @@ export default function Update() {
 
     // === MONTHLY LOGIC ===
     setMonthlyLoading(true);
-    axios.get(`http://localhost:8080/api/monthly?userId=${selectedUser}&date=${selectedDate}`)
+    axios.get(`${API_BASE_URL}/api/monthly?userId=${selectedUser}&date=${selectedDate}`)
       .then(res => {
         const data = res.data || [];
         if (data.length > 0) {
@@ -74,7 +75,7 @@ export default function Update() {
             paramName: `Param ${dto.paramId}`
           })));
         } else {
-          axios.get(`http://localhost:8080/api/userParameter?userId=${selectedUser}&trackingFrequency=MONTHLY`)
+          axios.get(`${API_BASE_URL}/api/userParameter?userId=${selectedUser}&trackingFrequency=MONTHLY`)
             .then(res => {
               const defaults = {};
               (res.data || []).forEach(p => { defaults[p.paramId] = false });
@@ -102,7 +103,7 @@ export default function Update() {
       metFlag: !!dailySelected[p.paramId]
     }));
     try {
-      await axios.post("http://localhost:8080/api/daily", dtoList);
+      await axios.post(`${API_BASE_URL}/api/daily`, dtoList);
       alert("Daily data saved successfully!");
     } catch (err) {
       console.error("Error saving daily data:", err);
@@ -118,7 +119,7 @@ export default function Update() {
       metFlag: !!monthlySelected[p.paramId]
     }));
     try {
-      await axios.post("http://localhost:8080/api/monthly", dtoList);
+      await axios.post(`${API_BASE_URL}/api/monthly`, dtoList);
       alert("Monthly data saved successfully!");
     } catch (err) {
       console.error("Error saving monthly data:", err);

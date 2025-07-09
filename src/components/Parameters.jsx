@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 export default function Parameters() {
   const [parameters, setParameters] = useState([]);
@@ -11,7 +12,7 @@ export default function Parameters() {
   }, []);
 
   const fetchParameters = () => {
-    axios.get("http://localhost:8080/api/parameters").then((res) => setParameters(res.data));
+    axios.get(`${API_BASE_URL}/api/parameters`).then((res) => setParameters(res.data));
   };
 
   const handleSubmit = async (e) => {
@@ -23,10 +24,10 @@ export default function Parameters() {
     };
 
     if (editingId) {
-      await axios.put(`http://localhost:8080/api/parameters/${editingId}`, dto);
+      await axios.put(`${API_BASE_URL}/api/parameters/${editingId}`, dto);
       setEditingId(null);
     } else {
-      await axios.post("http://localhost:8080/api/parameters", dto);
+      await axios.post(`${API_BASE_URL}/api/parameters`, dto);
     }
 
     setForm({ paramName: "", trackingFrequency: "DAILY", doneValue: "", notDoneValue: "" });
@@ -35,7 +36,7 @@ export default function Parameters() {
 
   const deleteParameter = async (paramId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/parameters/${paramId}`);
+      await axios.delete(`${API_BASE_URL}/api/parameters/${paramId}`);
       setParameters(parameters.filter((p) => p.paramId !== paramId));
     } catch (err) {
       console.error("Failed to delete parameter:", err);
