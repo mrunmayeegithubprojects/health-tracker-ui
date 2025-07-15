@@ -1,4 +1,3 @@
-// src/components/LandingPage.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
@@ -11,10 +10,10 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="landing-container">
-      <p className="intro-text">
+    <div className="landing-wrapper">
+      <div className="intro-text">
         Easily manage users, assign growth goals, update activity, and track monthly rewards — all in one place.
-      </p>
+      </div>
 
       <section className="features-section">
         <div className="feature-card" onClick={() => handleCardClick("/users")}>
@@ -44,7 +43,7 @@ const LandingPage = () => {
       </section>
 
       <footer className="landing-footer">
-        <p>Created by Mrunmayee Jadhav</p>
+        Created by Mrunmayee Jadhav
       </footer>
     </div>
   );
