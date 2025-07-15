@@ -1,19 +1,45 @@
-/* Basic styling for navigation links */
+/* 🌸 Dusty Lavender Navigation Tabs */
 .navbar {
   display: flex;
-  gap: 16px; /* spacing between links */
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 20px;
+  justify-content: flex-start;
 }
 
+/* Default tab look */
 .navbar a {
   text-decoration: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  color: #1d4ed8; /* blue */
-  font-weight: 500;
+  padding: 12px 20px;
+  border: 2px solid #c4b5fd;           /* dusty lavender */
+  border-radius: 8px;
+  color: #7c3aed;                      /* rich lavender text */
+  font-weight: 600;
+  font-size: 1.25rem;
+  transition: all 0.2s ease-in-out;
+  background-color: #f5f3ff;           /* very soft background */
 }
 
+/* Hover effect */
+.navbar a:hover {
+  background-color: #ede9fe;
+  transform: translateY(-1px);
+}
+
+/* Active tab */
 .navbar a.active {
-  background-color: #1d4ed8;
+  background-color: #c4b5fd;
   color: white;
+  border-color: #c4b5fd;
+  font-weight: 700;
+}
+
+/* 📱 Mobile optimization */
+@media (max-width: 480px) {
+  .navbar a {
+    font-size: 1.4rem;
+    padding: 14px 18px;
+    flex-grow: 1;
+    text-align: center;
+  }
 }
