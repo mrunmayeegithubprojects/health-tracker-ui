@@ -11,7 +11,6 @@ export default function Rewards() {
   const [rewardConsumed, setRewardConsumed] = useState("");
   const [calcMessage, setCalcMessage] = useState("");
 
-  // 📅 Generate past 6 months in MM-YYYY format (excluding current month always)
   useEffect(() => {
     const now = new Date();
     const cutoffDay = 4;
@@ -30,7 +29,6 @@ export default function Rewards() {
     setAvailableMonths(months);
   }, []);
 
-  // 👥 Fetch active users
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/users`)
       .then(res => {
@@ -40,7 +38,6 @@ export default function Rewards() {
       .catch(err => console.error("Failed to fetch users", err));
   }, []);
 
-  // 📥 Fetch or create reward entry
   useEffect(() => {
     if (!selectedUser || !selectedMonth) return;
 
@@ -49,26 +46,24 @@ export default function Rewards() {
     axios.get(`${API_BASE_URL}/api/rewards`, {
       params: {
         userId: selectedUser,
-        monYear: selectedMonth // 👈 changed from 'key' to 'monYear'
+        monYear: selectedMonth
       }
     })
       .then(res => {
         const val = res.data;
-        if (val === null || val === "" || typeof val === "undefined") {
-          // Not found → create reward entry
+        if (!val && val !== 0) {
           axios.post(`${API_BASE_URL}/api/rewards`, {
             userId: selectedUser,
-            key: selectedMonth // 👈 backend expects 'key' in request body
+            key: selectedMonth
           })
-            .then(() => {
-              // Re-fetch after creating
-              return axios.get(`${API_BASE_URL}/api/rewards`, {
+            .then(() =>
+              axios.get(`${API_BASE_URL}/api/rewards`, {
                 params: {
                   userId: selectedUser,
                   monYear: selectedMonth
                 }
-              });
-            })
+              })
+            )
             .then(res2 => {
               setRewardMessage(`Your ${selectedMonth} reward value is : ${res2.data}`);
             })
@@ -135,70 +130,119 @@ export default function Rewards() {
       });
   };
 
+  const lavender = "#6B5B95";
+
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Rewards</h2>
+    <div style={{ padding: "2rem", backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+      <h2 style={{
+        fontSize: "2.5rem",
+        fontWeight: "bold",
+        marginBottom: "2rem",
+        color: lavender,
+        textAlign: "center"
+      }}>
+        Rewards
+      </h2>
 
-      {/* 👤 User Dropdown */}
-      <select
-        value={selectedUser}
-        onChange={(e) => setSelectedUser(e.target.value)}
-        className="border p-2 mr-4"
-      >
-        <option value="">Select User</option>
-        {users.map(user => (
-          <option key={user.userId} value={user.userId}>
-            {user.name}
-          </option>
-        ))}
-      </select>
+      <div style={{
+        maxWidth: "700px",
+        margin: "0 auto",
+        backgroundColor: "#fff",
+        padding: "2rem",
+        borderRadius: "12px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+      }}>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <select
+            value={selectedUser}
+            onChange={(e) => setSelectedUser(e.target.value)}
+            style={{
+              fontSize: "1rem",
+              padding: "0.5rem 1rem",
+              marginRight: "1rem",
+              border: "1px solid #ccc",
+              borderRadius: "6px"
+            }}
+          >
+            <option value="">Select User</option>
+            {users.map(user => (
+              <option key={user.userId} value={user.userId}>{user.name}</option>
+            ))}
+          </select>
 
-      {/* 🗓️ Month Dropdown */}
-      <select
-        value={selectedMonth}
-        onChange={(e) => setSelectedMonth(e.target.value)}
-        className="border p-2"
-      >
-        <option value="">Select Duration (MM-YYYY)</option>
-        {availableMonths.map(month => (
-          <option key={month} value={month}>{month}</option>
-        ))}
-      </select>
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            style={{
+              fontSize: "1rem",
+              padding: "0.5rem 1rem",
+              border: "1px solid #ccc",
+              borderRadius: "6px"
+            }}
+          >
+            <option value="">Select Month (MM-YYYY)</option>
+            {availableMonths.map(month => (
+              <option key={month} value={month}>{month}</option>
+            ))}
+          </select>
+        </div>
 
-      {/* 🎯 Reward Message */}
-      {rewardMessage && (
-        <p className="mt-4 text-green-700">{rewardMessage}</p>
-      )}
-
-      {/* 🧾 Reward Consumed */}
-      <div className="mt-6">
-        <label className="block mb-1 font-semibold">Reward Points Consumed:</label>
-        <input
-          type="number"
-          value={rewardConsumed}
-          onChange={(e) => setRewardConsumed(e.target.value)}
-          className="border p-2 w-64 mr-2"
-          placeholder="Enter numeric value"
-        />
-        <button
-          onClick={handleRewardConsumedSave}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Save
-        </button>
-      </div>
-
-      {/* 📊 Calculate Button */}
-      <div className="mt-6">
-        <button
-          onClick={handleCalculateNow}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          Calculate Now
-        </button>
-        {calcMessage && (
-          <p className="mt-2 text-indigo-700">{calcMessage}</p>
+        {rewardMessage && (
+          <p style={{ color: "green", marginBottom: "1rem", fontSize: "1.1rem" }}>{rewardMessage}</p>
         )}
+
+        <div style={{ marginBottom: "1.5rem" }}>
+          <label style={{ display: "block", fontWeight: "600", marginBottom: "0.5rem" }}>
+            Reward Points Consumed:
+          </label>
+          <input
+            type="number"
+            value={rewardConsumed}
+            onChange={(e) => setRewardConsumed(e.target.value)}
+            placeholder="Enter numeric value"
+            style={{
+              padding: "0.5rem 1rem",
+              width: "200px",
+              marginRight: "1rem",
+              border: "1px solid #ccc",
+              borderRadius: "6px",
+              fontSize: "1rem"
+            }}
+          />
+          <button
+            onClick={handleRewardConsumedSave}
+            style={{
+              backgroundColor: lavender,
+              color: "#fff",
+              padding: "0.5rem 1rem",
+              borderRadius: "6px",
+              border: "none",
+              cursor: "pointer"
+            }}
+          >
+            Save
+          </button>
+        </div>
+
+        <div>
+          <button
+            onClick={handleCalculateNow}
+            style={{
+              backgroundColor: "#28a745",
+              color: "#fff",
+              padding: "0.5rem 1.25rem",
+              borderRadius: "6px",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1rem"
+            }}
+          >
+            Calculate Now
+          </button>
+          {calcMessage && (
+            <p style={{ marginTop: "1rem", color: "#333", fontWeight: "500" }}>{calcMessage}</p>
+          )}
+        </div>
       </div>
     </div>
   );

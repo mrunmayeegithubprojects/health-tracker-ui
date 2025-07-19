@@ -4,8 +4,14 @@ import { API_BASE_URL } from "../config";
 
 export default function Parameters() {
   const [parameters, setParameters] = useState([]);
-  const [form, setForm] = useState({ paramName: "", trackingFrequency: "DAILY", doneValue: "", notDoneValue: "" });
+  const [form, setForm] = useState({
+    paramName: "",
+    trackingFrequency: "DAILY",
+    doneValue: "",
+    notDoneValue: "",
+  });
   const [editingId, setEditingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchParameters();
@@ -54,24 +60,24 @@ export default function Parameters() {
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-2">
-        {editingId ? "Edit Parameter" : "Parameters"}
+    <div className="parameters-wrapper">
+      <h2 className="parameters-heading">
+        {editingId ? "Edit Parameter" : "Growth Parameters"}
       </h2>
 
-      {/* Create/Edit Form */}
-      <form className="space-y-2 mb-4" onSubmit={handleSubmit}>
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="parameter-form">
         <input
           value={form.paramName}
           onChange={(e) => setForm({ ...form, paramName: e.target.value })}
-          className="border p-1"
+          className="parameter-input"
           placeholder="Parameter Name"
           required
         />
         <select
           value={form.trackingFrequency}
           onChange={(e) => setForm({ ...form, trackingFrequency: e.target.value })}
-          className="border p-1"
+          className="parameter-input"
         >
           <option value="DAILY">DAILY</option>
           <option value="MONTHLY">MONTHLY</option>
@@ -80,7 +86,7 @@ export default function Parameters() {
           value={form.doneValue}
           onChange={(e) => setForm({ ...form, doneValue: e.target.value })}
           type="number"
-          className="border p-1"
+          className="parameter-input"
           placeholder="Done Value"
           required
         />
@@ -88,39 +94,48 @@ export default function Parameters() {
           value={form.notDoneValue}
           onChange={(e) => setForm({ ...form, notDoneValue: e.target.value })}
           type="number"
-          className="border p-1"
+          className="parameter-input"
           placeholder="Not Done Value"
           required
         />
-        <button type="submit" className="bg-blue-500 text-white px-2 py-1">
+        <button type="submit" className="parameter-button">
           {editingId ? "Update" : "Create"} Parameter
         </button>
       </form>
 
+      {/* Search Input */}
+      <input
+        type="text"
+        placeholder="Search by name..."
+        className="parameter-input"
+        style={{ marginBottom: "16px" }}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
       {/* List */}
-      <ul className="space-y-2">
-        {parameters.map((param) => (
-          <li key={param.paramId} className="flex justify-between items-center border p-2">
-            <div>
-              <strong>{param.paramName}</strong> ({param.trackingFrequency})
+      <div className="parameter-list">
+        {parameters
+          .filter((param) =>
+            param.paramName.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+          .map((param) => (
+            <div key={param.paramId} className="parameter-card">
+              <div className="parameter-info">
+                <div className="parameter-name">{param.paramName}</div>
+                <div className="parameter-meta">({param.trackingFrequency})</div>
+              </div>
+              <div className="parameter-actions">
+                <button onClick={() => startEdit(param)} className="edit-button">
+                  Edit
+                </button>
+                <button onClick={() => deleteParameter(param.paramId)} className="delete-button">
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="space-x-2">
-              <button
-                onClick={() => startEdit(param)}
-                className="bg-yellow-500 text-white px-2 py-1 rounded"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => deleteParameter(param.paramId)}
-                className="bg-red-500 text-white px-2 py-1 rounded"
-              >
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+          ))}
+      </div>
     </div>
   );
 }

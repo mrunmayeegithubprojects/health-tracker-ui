@@ -32,33 +32,47 @@ export default function Users() {
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-2">Users</h2>
+    <div className="users-wrapper">
+      <h2 className="users-heading">User Management</h2>
 
       {/* Create User Form */}
-      <form className="space-y-2 mb-4" onSubmit={handleSubmit}>
-        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="border p-1" placeholder="Name" required />
-        <input value={form.emailId} onChange={(e) => setForm({ ...form, emailId: e.target.value })} className="border p-1" placeholder="Email" required />
-        <input value={form.phoneNo} onChange={(e) => setForm({ ...form, phoneNo: e.target.value })} className="border p-1" placeholder="Phone" required />
-        <button type="submit" className="bg-blue-500 text-white px-2 py-1">Create User</button>
+      <form onSubmit={handleSubmit} className="user-form">
+        <input
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          className="user-input"
+          placeholder="Name"
+          required
+        />
+        <input
+          value={form.emailId}
+          onChange={(e) => setForm({ ...form, emailId: e.target.value })}
+          className="user-input"
+          placeholder="Email"
+          required
+        />
+        <input
+          value={form.phoneNo}
+          onChange={(e) => setForm({ ...form, phoneNo: e.target.value })}
+          className="user-input"
+          placeholder="Phone"
+          required
+        />
+        <button type="submit" className="user-button">Create User</button>
       </form>
 
       {/* User List */}
-      <ul className="space-y-2">
+      <div className="user-list">
         {users.map((user) => (
-          <li key={user.userId} className="flex justify-between items-center border p-2">
+          <div key={user.userId} className="user-card">
             <div>
-              <strong>{user.name}</strong> - {user.emailId}
+              <div className="user-name">{user.name}</div>
+              <div className="user-email">{user.emailId}</div>
             </div>
-            <button
-              onClick={() => deleteUser(user.userId)}
-              className="bg-red-500 text-white px-2 py-1 rounded"
-            >
-              Delete
-            </button>
-          </li>
+            <button onClick={() => deleteUser(user.userId)} className="delete-button">Delete</button>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

@@ -7,22 +7,13 @@ export default function Update() {
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
-  // Daily state
   const [dailyParams, setDailyParams] = useState([]);
   const [dailySelected, setDailySelected] = useState({});
   const [dailyLoading, setDailyLoading] = useState(false);
 
-  // Monthly state
   const [monthlyParams, setMonthlyParams] = useState([]);
   const [monthlySelected, setMonthlySelected] = useState({});
   const [monthlyLoading, setMonthlyLoading] = useState(false);
-
-  const today = new Date();
-  const allowedDates = [0, 1, 2].map(daysAgo => {
-    const d = new Date();
-    d.setDate(today.getDate() - daysAgo);
-    return d.toISOString().split("T")[0];
-  });
 
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/users`)
@@ -36,7 +27,6 @@ export default function Update() {
   useEffect(() => {
     if (!selectedUser || !selectedDate) return;
 
-    // === DAILY LOGIC ===
     setDailyLoading(true);
     axios.get(`${API_BASE_URL}/api/daily?userId=${selectedUser}&date=${selectedDate}`)
       .then(res => {
@@ -61,7 +51,6 @@ export default function Update() {
       })
       .finally(() => setDailyLoading(false));
 
-    // === MONTHLY LOGIC ===
     setMonthlyLoading(true);
     axios.get(`${API_BASE_URL}/api/monthly?userId=${selectedUser}&date=${selectedDate}`)
       .then(res => {
@@ -127,15 +116,87 @@ export default function Update() {
     }
   };
 
-  return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Parameter Update</h2>
+  const lavender = "#7b6cd9";
 
-      <div className="mb-4">
+  const styles = {
+    container: { padding: "24px" },
+    title: {
+      fontSize: "34px",
+      fontWeight: "700",
+      marginBottom: "24px",
+      color: lavender
+    },
+    input: {
+      fontSize: "18px",
+      padding: "8px 12px",
+      marginRight: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "6px"
+    },
+    inputRow: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "16px",
+      marginBottom: "32px"
+    },
+    splitWrap: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "24px",
+      alignItems: "flex-start"
+    },
+    section: {
+      flex: "1 1 460px",
+      border: "1px solid #ccc",
+      borderRadius: "12px",
+      padding: "24px",
+      backgroundColor: "#fff",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+      maxHeight: "600px",
+      overflow: "auto"
+    },
+    heading: {
+      fontSize: "28px",
+      fontWeight: "600",
+      marginBottom: "16px",
+      color: lavender
+    },
+    label: {
+      fontSize: "18px",
+      color: "#333",
+      marginBottom: "8px",
+      display: "flex",
+      alignItems: "center"
+    },
+    checkbox: {
+      marginRight: "10px"
+    },
+    grid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+      gap: "12px"
+    },
+    button: {
+      marginTop: "20px",
+      padding: "10px 20px",
+      fontSize: "18px",
+      backgroundColor: lavender,
+      color: "#fff",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer"
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <h2 style={styles.title}>Parameter Update</h2>
+
+      <div style={styles.inputRow}>
         <select
           value={selectedUser}
           onChange={e => setSelectedUser(e.target.value)}
-          className="border p-2 mr-4"
+          style={styles.input}
         >
           <option value="">Select User</option>
           {users.map(user => (
@@ -147,66 +208,64 @@ export default function Update() {
           type="date"
           value={selectedDate}
           onChange={e => setSelectedDate(e.target.value)}
-          className="border p-2"
-          min={allowedDates[2]}
-          max={allowedDates[0]}
+          style={styles.input}
         />
       </div>
 
-      {/* === DAILY SECTION === */}
-      <div className="border p-4 mb-6">
-        <h3 className="text-lg font-semibold mb-2">Daily Update</h3>
-        {dailyLoading ? (
-          <p>Loading daily data...</p>
-        ) : dailyParams.length > 0 ? (
-          <>
-            {dailyParams.map(p => (
-              <label key={p.paramId} className="block">
-                <input
-                  type="checkbox"
-                  checked={!!dailySelected[p.paramId]}
-                  onChange={() => toggleDailyParam(p.paramId)}
-                  className="mr-2"
-                />
-                {p.paramName}
-              </label>
-            ))}
-            <button
-              onClick={saveDaily}
-              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Save Daily
-            </button>
-          </>
-        ) : <p>No daily parameters found.</p>}
-      </div>
+      <div style={styles.splitWrap}>
+        {/* DAILY SECTION */}
+        <div style={styles.section}>
+          <h3 style={styles.heading}>Daily Update</h3>
+          {dailyLoading ? (
+            <p style={{ color: "#666" }}>Loading daily data...</p>
+          ) : dailyParams.length > 0 ? (
+            <>
+              <div style={styles.grid}>
+                {dailyParams.map(p => (
+                  <label key={p.paramId} style={styles.label}>
+                    <input
+                      type="checkbox"
+                      checked={!!dailySelected[p.paramId]}
+                      onChange={() => toggleDailyParam(p.paramId)}
+                      style={styles.checkbox}
+                    />
+                    {p.paramName}
+                  </label>
+                ))}
+              </div>
+              <button onClick={saveDaily} style={styles.button}>
+                Save Daily
+              </button>
+            </>
+          ) : <p style={{ color: "#777" }}>No daily parameters found.</p>}
+        </div>
 
-      {/* === MONTHLY SECTION === */}
-      <div className="border p-4">
-        <h3 className="text-lg font-semibold mb-2">Monthly Update</h3>
-        {monthlyLoading ? (
-          <p>Loading monthly data...</p>
-        ) : monthlyParams.length > 0 ? (
-          <>
-            {monthlyParams.map(p => (
-              <label key={p.paramId} className="block">
-                <input
-                  type="checkbox"
-                  checked={!!monthlySelected[p.paramId]}
-                  onChange={() => toggleMonthlyParam(p.paramId)}
-                  className="mr-2"
-                />
-                {p.paramName}
-              </label>
-            ))}
-            <button
-              onClick={saveMonthly}
-              className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Save Monthly
-            </button>
-          </>
-        ) : <p>No monthly parameters found.</p>}
+        {/* MONTHLY SECTION */}
+        <div style={styles.section}>
+          <h3 style={styles.heading}>Monthly Update</h3>
+          {monthlyLoading ? (
+            <p style={{ color: "#666" }}>Loading monthly data...</p>
+          ) : monthlyParams.length > 0 ? (
+            <>
+              <div style={styles.grid}>
+                {monthlyParams.map(p => (
+                  <label key={p.paramId} style={styles.label}>
+                    <input
+                      type="checkbox"
+                      checked={!!monthlySelected[p.paramId]}
+                      onChange={() => toggleMonthlyParam(p.paramId)}
+                      style={styles.checkbox}
+                    />
+                    {p.paramName}
+                  </label>
+                ))}
+              </div>
+              <button onClick={saveMonthly} style={styles.button}>
+                Save Monthly
+              </button>
+            </>
+          ) : <p style={{ color: "#777" }}>No monthly parameters found.</p>}
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
+import "./UserParameters.css";
 
 export default function UserParameters() {
   const [users, setUsers] = useState([]);
@@ -11,25 +12,24 @@ export default function UserParameters() {
 
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/users`)
-      .then((res) => setUsers(res.data))
-      .catch((err) => console.error("Failed to fetch users", err));
+      .then(res => setUsers(res.data))
+      .catch(err => console.error("Failed to fetch users", err));
 
     axios.get(`${API_BASE_URL}/api/parameters`)
-      .then((res) => setParameters(res.data))
-      .catch((err) => console.error("Failed to fetch parameters", err));
+      .then(res => setParameters(res.data))
+      .catch(err => console.error("Failed to fetch parameters", err));
   }, []);
 
   useEffect(() => {
     if (selectedUser) {
       axios.get(`${API_BASE_URL}/api/userParameter/${selectedUser}`)
-        .then((res) => {
+        .then(res => {
           const paramList = res.data.parameterDTOList || [];
           setUserParams(paramList);
-          setSelectedParams(paramList.map(p => p.paramId)); // ✅ auto-check
+          setSelectedParams(paramList.map(p => p.paramId));
         })
-        .catch((err) => console.error("Failed to fetch user parameters", err));
+        .catch(err => console.error("Failed to fetch user parameters", err));
     } else {
-      // Clear states if no user is selected
       setUserParams([]);
       setSelectedParams([]);
     }
@@ -51,13 +51,15 @@ export default function UserParameters() {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-2">Assign Parameters to User</h2>
+    <div className="user-param-wrapper">
+      <h2 className="heading">Assign Parameters</h2>
 
+      {/* User Dropdown */}
+      <label className="label">Select a User:</label>
       <select
         value={selectedUser || ""}
         onChange={(e) => setSelectedUser(e.target.value)}
-        className="border p-1 mb-2"
+        className="input-select"
       >
         <option value="" disabled>Select User</option>
         {users.map(user => (
@@ -65,44 +67,46 @@ export default function UserParameters() {
         ))}
       </select>
 
-      <div className="space-y-1 mb-2">
-        {parameters.map(param => (
-          <label key={param.paramId} className="block">
-            <input
-              type="checkbox"
-              checked={selectedParams.includes(param.paramId)}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setSelectedParams(prev => [...prev, param.paramId]);
-                } else {
-                  setSelectedParams(prev => prev.filter(id => id !== param.paramId));
-                }
-              }}
-            /> {param.paramName}
-          </label>
-        ))}
-      </div>
-
+      {/* Split view */}
       {selectedUser && (
-        <button
-          onClick={handleAssign}
-          className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-        >
-          Assign Selected
-        </button>
-      )}
+        <div className="split-view">
+          {/* Left: Available */}
+          <div className="left-panel">
+            <h3 className="sub-heading">Available Parameters</h3>
+            <div className="checkbox-group">
+              {parameters.map(param => (
+                <label key={param.paramId} className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={selectedParams.includes(param.paramId)}
+                    onChange={(e) => {
+                      const updated = e.target.checked
+                        ? [...selectedParams, param.paramId]
+                        : selectedParams.filter(id => id !== param.paramId);
+                      setSelectedParams(updated);
+                    }}
+                  />
+                  {param.paramName}
+                </label>
+              ))}
+            </div>
+            <button onClick={handleAssign} className="assign-button">
+              Save Assignment
+            </button>
+          </div>
 
-      {userParams.length > 0 && (
-        <>
-          <h3 className="text-lg font-semibold mt-4">Assigned Parameters:</h3>
-          <ul className="list-disc pl-5">
-            {userParams.map(param => (
-              <li key={param.paramId}>
-                {param.paramName} ({param.trackingFrequency})
-              </li>
-            ))}
-          </ul>
-        </>
+          {/* Right: Assigned */}
+          <div className="right-panel">
+            <h3 className="sub-heading">Assigned Parameters</h3>
+            <ul className="param-list">
+              {userParams.map(param => (
+                <li key={param.paramId}>
+                  {param.paramName} ({param.trackingFrequency})
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       )}
     </div>
   );
