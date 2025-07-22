@@ -35,10 +35,19 @@ export default function Update() {
           const map = {};
           data.forEach(dto => { map[dto.paramId] = dto.metFlag });
           setDailySelected(map);
-          setDailyParams(data.map(dto => ({
-            paramId: dto.paramId,
-            paramName: `Param ${dto.paramId}`
-          })));
+          axios.get(`${API_BASE_URL}/api/userParameter?userId=${selectedUser}&trackingFrequency=DAILY`)
+            .then(paramRes => {
+              const paramMap = {};
+              (paramRes.data || []).forEach(p => {
+                paramMap[p.paramId] = p.paramName;
+              });
+
+              setDailyParams(data.map(dto => ({
+                paramId: dto.paramId,
+                paramName: paramMap[dto.paramId] || `Param ${dto.paramId}`
+              })));
+            });
+
         } else {
           axios.get(`${API_BASE_URL}/api/userParameter?userId=${selectedUser}&trackingFrequency=DAILY`)
             .then(res => {
@@ -59,10 +68,19 @@ export default function Update() {
           const map = {};
           data.forEach(dto => { map[dto.paramId] = dto.metFlag });
           setMonthlySelected(map);
-          setMonthlyParams(data.map(dto => ({
-            paramId: dto.paramId,
-            paramName: `Param ${dto.paramId}`
-          })));
+          axios.get(`${API_BASE_URL}/api/userParameter?userId=${selectedUser}&trackingFrequency=MONTHLY`)
+            .then(paramRes => {
+              const paramMap = {};
+              (paramRes.data || []).forEach(p => {
+                paramMap[p.paramId] = p.paramName;
+              });
+
+              setMonthlyParams(data.map(dto => ({
+                paramId: dto.paramId,
+                paramName: paramMap[dto.paramId] || `Param ${dto.paramId}`
+              })));
+            });
+
         } else {
           axios.get(`${API_BASE_URL}/api/userParameter?userId=${selectedUser}&trackingFrequency=MONTHLY`)
             .then(res => {
