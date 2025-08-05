@@ -10,10 +10,13 @@ export default function Update() {
   const [dailyParams, setDailyParams] = useState([]);
   const [dailySelected, setDailySelected] = useState({});
   const [dailyLoading, setDailyLoading] = useState(false);
+  const [skipToday, setSkipToday] = useState(false);
 
   const [monthlyParams, setMonthlyParams] = useState([]);
   const [monthlySelected, setMonthlySelected] = useState({});
   const [monthlyLoading, setMonthlyLoading] = useState(false);
+
+  const [standings, setStandings] = useState({});
 
   useEffect(() => {
     axios.get(`${API_BASE_URL}/api/users`)
@@ -23,6 +26,15 @@ export default function Update() {
       })
       .catch(err => console.error("Failed to fetch users:", err));
   }, []);
+
+  useEffect(() => {
+    if (selectedDate) {
+      axios.get(`${API_BASE_URL}/api/daily/standings?date=${selectedDate}`)
+        .then(res => {
+          setStandings(res.data || {});
+        });
+    }
+  }, [selectedDate]);
 
   useEffect(() => {
     if (!selectedUser || !selectedDate) return;
@@ -47,7 +59,6 @@ export default function Update() {
                 paramName: paramMap[dto.paramId] || `Param ${dto.paramId}`
               })));
             });
-
         } else {
           axios.get(`${API_BASE_URL}/api/userParameter?userId=${selectedUser}&trackingFrequency=DAILY`)
             .then(res => {
@@ -80,7 +91,6 @@ export default function Update() {
                 paramName: paramMap[dto.paramId] || `Param ${dto.paramId}`
               })));
             });
-
         } else {
           axios.get(`${API_BASE_URL}/api/userParameter?userId=${selectedUser}&trackingFrequency=MONTHLY`)
             .then(res => {
@@ -107,11 +117,18 @@ export default function Update() {
       userId: selectedUser,
       paramId: p.paramId,
       date: selectedDate,
-      metFlag: !!dailySelected[p.paramId]
+      metFlag: !!dailySelected[p.paramId],
+      skipFlag: skipToday
     }));
     try {
       await axios.post(`${API_BASE_URL}/api/daily`, dtoList);
       alert("Daily data saved successfully!");
+      // Refresh standings
+      axios.get(`${API_BASE_URL}/api/daily/standings?date=${selectedDate}`)
+        .then(res => {
+          setStandings(res.data || {});
+        })
+        .catch(err => console.error("Failed to refresh standings:", err));
     } catch (err) {
       console.error("Error saving daily data:", err);
       alert("Failed to save daily data.");
@@ -128,6 +145,12 @@ export default function Update() {
     try {
       await axios.post(`${API_BASE_URL}/api/monthly`, dtoList);
       alert("Monthly data saved successfully!");
+      // Refresh standings
+      axios.get(`${API_BASE_URL}/api/daily/standings?date=${selectedDate}`)
+        .then(res => {
+          setStandings(res.data || {});
+        })
+        .catch(err => console.error("Failed to refresh standings:", err));
     } catch (err) {
       console.error("Error saving monthly data:", err);
       alert("Failed to save monthly data.");
@@ -149,13 +172,47 @@ export default function Update() {
       padding: "8px 12px",
       marginRight: "16px",
       border: "1px solid #ccc",
-      borderRadius: "6px"
+      borderRadius: "6px",
+      width: "200px"
     },
-    inputRow: {
+    inputSectionRow: {
       display: "flex",
-      flexWrap: "wrap",
-      gap: "16px",
-      marginBottom: "32px"
+      justifyContent: "space-between",
+      marginBottom: "32px",
+      gap: "20px",
+      alignItems: "flex-start"
+    },
+    inputBox: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "12px",
+      padding: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "12px",
+      backgroundColor: "#f9f9f9",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+    },
+    standingsBox: {
+      border: "1px solid #ccc",
+      borderRadius: "12px",
+      padding: "16px",
+      backgroundColor: "#f9f9f9",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      minWidth: "300px",
+      maxHeight: "200px",
+      overflowY: "auto"
+    },
+    standingsTitle: {
+      fontSize: "20px",
+      fontWeight: "600",
+      color: lavender,
+      marginBottom: "12px"
+    },
+    standingsRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: "8px",
+      fontSize: "16px"
     },
     splitWrap: {
       display: "flex",
@@ -173,10 +230,15 @@ export default function Update() {
       maxHeight: "600px",
       overflow: "auto"
     },
+    headingRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "16px"
+    },
     heading: {
       fontSize: "28px",
       fontWeight: "600",
-      marginBottom: "16px",
       color: lavender
     },
     label: {
@@ -210,30 +272,55 @@ export default function Update() {
     <div style={styles.container}>
       <h2 style={styles.title}>Parameter Update</h2>
 
-      <div style={styles.inputRow}>
-        <select
-          value={selectedUser}
-          onChange={e => setSelectedUser(e.target.value)}
-          style={styles.input}
-        >
-          <option value="">Select User</option>
-          {users.map(user => (
-            <option key={user.userId} value={user.userId}>{user.name}</option>
-          ))}
-        </select>
+      <div style={styles.inputSectionRow}>
+        <div style={styles.inputBox}>
+          <select
+            value={selectedUser}
+            onChange={e => setSelectedUser(e.target.value)}
+            style={styles.input}
+          >
+            <option value="">Select User</option>
+            {users.map(user => (
+              <option key={user.userId} value={user.userId}>{user.name}</option>
+            ))}
+          </select>
 
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={e => setSelectedDate(e.target.value)}
-          style={styles.input}
-        />
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={e => setSelectedDate(e.target.value)}
+            style={styles.input}
+          />
+        </div>
+
+        <div style={styles.standingsBox}>
+          <div style={styles.standingsTitle}>Current Month Rewards</div>
+          {users.map(user => (
+            <div key={user.userId} style={styles.standingsRow}>
+              <span>{user.name}</span>
+              <span>{standings[user.userId] ?? 0}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div style={styles.splitWrap}>
-        {/* DAILY SECTION */}
+        {/* Daily Update */}
         <div style={styles.section}>
-          <h3 style={styles.heading}>Daily Update</h3>
+          <div style={styles.headingRow}>
+            <h3 style={styles.heading}>Daily Update</h3>
+            {selectedUser && (
+              <label style={{ ...styles.label, fontWeight: "bold" }}>
+                <input
+                  type="checkbox"
+                  checked={skipToday}
+                  onChange={() => setSkipToday(!skipToday)}
+                  style={styles.checkbox}
+                />
+                Skip Today
+              </label>
+            )}
+          </div>
           {dailyLoading ? (
             <p style={{ color: "#666" }}>Loading daily data...</p>
           ) : dailyParams.length > 0 ? (
@@ -246,6 +333,7 @@ export default function Update() {
                       checked={!!dailySelected[p.paramId]}
                       onChange={() => toggleDailyParam(p.paramId)}
                       style={styles.checkbox}
+                      disabled={skipToday}
                     />
                     {p.paramName}
                   </label>
@@ -258,7 +346,7 @@ export default function Update() {
           ) : <p style={{ color: "#777" }}>No daily parameters found.</p>}
         </div>
 
-        {/* MONTHLY SECTION */}
+        {/* Monthly Update */}
         <div style={styles.section}>
           <h3 style={styles.heading}>Monthly Update</h3>
           {monthlyLoading ? (
